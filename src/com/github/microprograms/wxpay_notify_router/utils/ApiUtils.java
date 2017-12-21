@@ -1,4 +1,4 @@
-package com.github.microprograms.wxpay_notify_router;
+package com.github.microprograms.wxpay_notify_router.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import org.apache.commons.io.IOUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
-public class Apis {
+public class ApiUtils {
 
     public static String post(String url, JSONObject param, int connectTimeoutMs, int readTimeoutMs) throws IOException {
         String reqBody = param.toJSONString();
