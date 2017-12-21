@@ -21,13 +21,22 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.microprograms.wxpay_notify_router.utils.ApiUtils;
 import com.github.microprograms.wxpay_sdk_java.WXPay;
 import com.github.microprograms.wxpay_sdk_java.WXPayUtil;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 @WebServlet("/*")
 public class WxpayNotifyRouter extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(WxpayNotifyRouter.class);
     private static final long serialVersionUID = 1L;
-    private static final String qipai_exchange_app_api__wxPay_notify_api__url = "http://47.104.17.187:8083/qipai-exchange-app-api";
-    private static final String qipai_exchange_app_api__wxPay_notify_api__key = "0bf86bcf-263a-4256-81a2-dcf735da5411";
+    private String wxPay_notify_api_url;
+    private String wxPay_notify_api_key;
+
+    @Override
+    public void init() throws ServletException {
+        Config conf = ConfigFactory.load();
+        wxPay_notify_api_url = conf.getString("wxPay_notify_api_url");
+        wxPay_notify_api_key = conf.getString("wxPay_notify_api_key");
+    }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         final long startTimeMillis = System.currentTimeMillis();
@@ -50,8 +59,8 @@ public class WxpayNotifyRouter extends HttpServlet {
                 // 注意特殊情况：订单已经退款，但收到了支付结果成功的通知，不应把商户侧订单状态从退款改成支付成功
                 JSONObject param = new JSONObject();
                 param.put("data", JSON.toJSONString(notifyMap));
-                param.put("key", qipai_exchange_app_api__wxPay_notify_api__key);
-                String qipaiRespString = ApiUtils.post(qipai_exchange_app_api__wxPay_notify_api__url, param, myWxPayConfig.getHttpConnectTimeoutMs(), myWxPayConfig.getHttpReadTimeoutMs());
+                param.put("key", wxPay_notify_api_key);
+                String qipaiRespString = ApiUtils.post(wxPay_notify_api_url, param, myWxPayConfig.getHttpConnectTimeoutMs(), myWxPayConfig.getHttpReadTimeoutMs());
                 JSONObject qipaiResp = JSON.parseObject(qipaiRespString);
                 if (qipaiResp.getIntValue("code") == 0) {
                     respMap.put("return_code", "SUCCESS");
