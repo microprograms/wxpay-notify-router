@@ -7,14 +7,20 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
 
 public class ApiUtils {
+    private static final Logger log = LoggerFactory.getLogger(ApiUtils.class);
 
     public static String post(String url, JSONObject param, int connectTimeoutMs, int readTimeoutMs) throws IOException {
+        String requestId = UUID.randomUUID().toString();
+        log.debug("Post Request, url={}, param={}, requestId={}", url, param.toJSONString(), requestId);
         String reqBody = param.toJSONString();
         URL httpUrl = new URL(url);
         HttpURLConnection httpURLConnection = (HttpURLConnection) httpUrl.openConnection();
@@ -37,6 +43,7 @@ public class ApiUtils {
         String resp = stringBuffer.toString();
         IOUtils.closeQuietly(inputStream);
         IOUtils.closeQuietly(outputStream);
+        log.debug("Post Response, resp={}, requestId={}", resp, requestId);
         return resp;
     }
 }

@@ -54,6 +54,7 @@ public class WxpayNotifyRouter extends HttpServlet {
             Map<String, String> notifyMap = WXPayUtil.xmlToMap(requestContent); // 转换成map
             MyWxPayConfig myWxPayConfig = new MyWxPayConfig();
             WXPay wxpay = new WXPay(myWxPayConfig);
+            String orderId = notifyMap.get("out_trade_no");
             if (wxpay.isPayResultNotifySignatureValid(notifyMap)) {
                 // 签名正确，进行处理。
                 // 注意特殊情况：订单已经退款，但收到了支付结果成功的通知，不应把商户侧订单状态从退款改成支付成功
@@ -63,6 +64,7 @@ public class WxpayNotifyRouter extends HttpServlet {
                 String qipaiRespString = ApiUtils.post(wxPay_notify_api_url, param, myWxPayConfig.getHttpConnectTimeoutMs(), myWxPayConfig.getHttpReadTimeoutMs());
                 JSONObject qipaiResp = JSON.parseObject(qipaiRespString);
                 if (qipaiResp.getIntValue("code") == 0) {
+                    log.info("WxPay Success, orderId={}", orderId);
                     respMap.put("return_code", "SUCCESS");
                     respMap.put("return_msg", "OK");
                 } else {
