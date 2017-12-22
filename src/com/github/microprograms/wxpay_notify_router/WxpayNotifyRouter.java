@@ -21,22 +21,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.microprograms.wxpay_notify_router.utils.ApiUtils;
 import com.github.microprograms.wxpay_sdk_java.WXPay;
 import com.github.microprograms.wxpay_sdk_java.WXPayUtil;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 @WebServlet("/*")
 public class WxpayNotifyRouter extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(WxpayNotifyRouter.class);
     private static final long serialVersionUID = 1L;
-    private String wxPay_notify_api_url;
-    private String wxPay_notify_api_key;
-
-    @Override
-    public void init() throws ServletException {
-        Config conf = ConfigFactory.load();
-        wxPay_notify_api_url = conf.getString("wxPay_notify_api_url");
-        wxPay_notify_api_key = conf.getString("wxPay_notify_api_key");
-    }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         final long startTimeMillis = System.currentTimeMillis();
@@ -52,16 +41,15 @@ public class WxpayNotifyRouter extends HttpServlet {
             log.debug("execute request, req={}", requestContent);
 
             Map<String, String> notifyMap = WXPayUtil.xmlToMap(requestContent); // 转换成map
-            MyWxPayConfig myWxPayConfig = new MyWxPayConfig();
-            WXPay wxpay = new WXPay(myWxPayConfig);
+            WXPay wxpay = new WXPay(SystemConfig.getWXPayConfig());
             String orderId = notifyMap.get("out_trade_no");
             if (wxpay.isPayResultNotifySignatureValid(notifyMap)) {
                 // 签名正确，进行处理。
                 // 注意特殊情况：订单已经退款，但收到了支付结果成功的通知，不应把商户侧订单状态从退款改成支付成功
                 JSONObject param = new JSONObject();
                 param.put("data", JSON.toJSONString(notifyMap));
-                param.put("key", wxPay_notify_api_key);
-                String qipaiRespString = ApiUtils.post(wxPay_notify_api_url, param, myWxPayConfig.getHttpConnectTimeoutMs(), myWxPayConfig.getHttpReadTimeoutMs());
+                param.put("key", SystemConfig.get_wxPay_notify_api_key());
+                String qipaiRespString = ApiUtils.post(SystemConfig.get_wxPay_notify_api_url(), param);
                 JSONObject qipaiResp = JSON.parseObject(qipaiRespString);
                 if (qipaiResp.getIntValue("code") == 0) {
                     log.info("WxPay Success, orderId={}", orderId);

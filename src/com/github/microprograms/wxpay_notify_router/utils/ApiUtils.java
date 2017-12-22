@@ -14,11 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.microprograms.wxpay_notify_router.SystemConfig;
 
 public class ApiUtils {
     private static final Logger log = LoggerFactory.getLogger(ApiUtils.class);
 
-    public static String post(String url, JSONObject param, int connectTimeoutMs, int readTimeoutMs) throws IOException {
+    public static String post(String url, JSONObject param) throws IOException {
         String requestId = UUID.randomUUID().toString();
         log.debug("Post Request, url={}, param={}, requestId={}", url, param.toJSONString(), requestId);
         String reqBody = param.toJSONString();
@@ -26,12 +27,11 @@ public class ApiUtils {
         HttpURLConnection httpURLConnection = (HttpURLConnection) httpUrl.openConnection();
         httpURLConnection.setDoOutput(true);
         httpURLConnection.setRequestMethod("POST");
-        httpURLConnection.setConnectTimeout(connectTimeoutMs);
-        httpURLConnection.setReadTimeout(readTimeoutMs);
+        httpURLConnection.setConnectTimeout(SystemConfig.httpConnectTimeoutMs);
+        httpURLConnection.setReadTimeout(SystemConfig.httpReadTimeoutMs);
         httpURLConnection.connect();
         OutputStream outputStream = httpURLConnection.getOutputStream();
         outputStream.write(reqBody.getBytes("UTF-8"));
-
         // 获取内容
         InputStream inputStream = httpURLConnection.getInputStream();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
