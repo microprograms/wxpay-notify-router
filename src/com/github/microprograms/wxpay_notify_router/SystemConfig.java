@@ -50,6 +50,10 @@ public class SystemConfig {
         };
     }
 
+    public static String get_wxPay_notify_api_name() {
+        return config.getString("wxPay_notify_api_name");
+    }
+
     public static String get_wxPay_notify_api_url() {
         return config.getString("wxPay_notify_api_url");
     }

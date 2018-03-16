@@ -47,7 +47,7 @@ public class WxpayNotifyRouter extends HttpServlet {
                 // 签名正确，进行处理。
                 // 注意特殊情况：订单已经退款，但收到了支付结果成功的通知，不应把商户侧订单状态从退款改成支付成功
                 JSONObject param = new JSONObject();
-                param.put("apiName", "WxPay_Notify_Api");
+                param.put("apiName", SystemConfig.get_wxPay_notify_api_name());
                 param.put("data", JSON.toJSONString(notifyMap));
                 param.put("key", SystemConfig.get_wxPay_notify_api_key());
                 String qipaiRespString = ApiUtils.post(SystemConfig.get_wxPay_notify_api_url(), param);
